@@ -5,6 +5,8 @@ import 'package:flutter/painting.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:intl/intl.dart';
+
 void main() {
   runApp( MaterialApp(
     debugShowCheckedModeBanner: false,
@@ -21,25 +23,174 @@ class DetailsScreenPage extends StatelessWidget{
 
   Future<void> generateInvoice() async{
     final PdfDocument document = PdfDocument();
-    final PdfLayoutResult layoutResult = PdfTextElement(
-        text: "duighuih",
-        font: PdfStandardFont(PdfFontFamily.helvetica, 12),
-        brush: PdfSolidBrush(PdfColor(0, 0, 0)))
-        .draw(
-        page: ,
-        bounds: Rect.fromLTWH(
-            0, 0, page.getClientSize().width, page.getClientSize().height),
-        format: PdfLayoutFormat(layoutType: PdfLayoutType.paginate))!;
-// Draw the next paragraph/content.
+    final page = document.pages.add();
+    PdfTextElement element= PdfTextElement(
+      text: "INVOICE 001",font: PdfStandardFont(PdfFontFamily.timesRoman, 14)
+    );
+
+    PdfLayoutResult result = element.draw(
+      page: page,
+      bounds: Rect.fromLTWH(10, 100, 0, 0)
+    )!;
+    String currentDate = "Date"+ DateFormat.yMMMMd().format(DateTime.now());
+    
+    page.graphics.drawString(currentDate, PdfStandardFont(PdfFontFamily.timesRoman, 14,),
+        brush: element.brush,
+        bounds: Offset(page.graphics.clientSize.width - 120,
+            result.bounds.top) &
+        Size(80 + 2, 20));
+    //
+    element = PdfTextElement(
+        text: 'BILL TO ',
+        font: PdfStandardFont(PdfFontFamily.timesRoman, 10,
+            style: PdfFontStyle.bold));
+    element.brush = PdfSolidBrush(PdfColor(126, 155, 203));
+
+    result = element.draw(
+        page: page, bounds: Rect.fromLTWH(10, result.bounds.bottom + 25, 0, 0))!;
+
+    element = PdfTextElement(text:  nameController.text, font: PdfStandardFont(PdfFontFamily.timesRoman,14));
+    element.brush = PdfBrushes.black;
+    result = element.draw(
+        page: page, bounds: Rect.fromLTWH(10, result.bounds.bottom + 10, 0, 0))!;
+    // email
+    element = PdfTextElement(text:  emailController.text, font: PdfStandardFont(PdfFontFamily.timesRoman,12));
+    element.brush = PdfBrushes.black;
+    result = element.draw(
+        page: page, bounds: Rect.fromLTWH(10, result.bounds.bottom + 10, 0, 0))!;
+    // phoneNo.
+    element = PdfTextElement(text:  phoneNoController.text, font: PdfStandardFont(PdfFontFamily.timesRoman,12));
+    element.brush = PdfBrushes.black;
+    result = element.draw(
+        page: page, bounds: Rect.fromLTWH(10, result.bounds.bottom + 10, 0, 0))!;
+    // address to
+    element= PdfTextElement(text: "fghhdfghdgh",font: PdfStandardFont(PdfFontFamily.timesRoman,12));
+    element.brush=PdfBrushes.black;
+    element.draw(
+      page: page,bounds: Rect.fromLTWH(10, result.bounds.top+10, 0, 0)
+    );
+
     page.graphics.drawLine(
-        PdfPen(PdfColor(255, 0, 0)),
-        Offset(0, layoutResult.bounds.bottom + 10),
-        Offset(page.getClientSize().width, layoutResult.bounds.bottom + 10));
-    document.pages.add().graphics.drawString(
-       "${nameController.text},${phoneNoController.text}" ,PdfStandardFont(PdfFontFamily.helvetica, 12));
+        PdfPen(PdfColor(126, 151, 173), width: 0.7),
+        Offset(0, result.bounds.bottom + 3),
+        Offset(page.graphics.clientSize.width, result.bounds.bottom + 3));
+
+
+
+
+
+    final PdfGrid grid = PdfGrid();
+
+    grid.columns.add(count: 5);
+    grid.headers.add(1);
+
+    PdfGridRow header = grid.headers[0];
+    header.cells[0].value="Product Id";
+    header.cells[1].value="Product name";
+    header.cells[2].value="Price ";
+    header.cells[3].value="Quantity ";
+    header.cells[4].value = 'Total';
+
+
+
+
+    PdfGridCellStyle headerStyle = PdfGridCellStyle();
+    headerStyle.borders.all = PdfPen(PdfColor(126, 151, 173));
+    headerStyle.backgroundBrush = PdfSolidBrush(PdfColor(126, 151, 173));
+    headerStyle.textBrush = PdfBrushes.white;
+    headerStyle.font = PdfStandardFont(PdfFontFamily.timesRoman, 14,
+        style: PdfFontStyle.regular);
+    for(int i = 0;i<header.cells.count;i++){
+      if(i==0||i==1){
+        header.cells[i].stringFormat = PdfStringFormat(
+            alignment: PdfTextAlignment.left,
+            lineAlignment: PdfVerticalAlignment.middle);
+      } else {
+        header.cells[i].stringFormat = PdfStringFormat(
+            alignment: PdfTextAlignment.right,
+            lineAlignment: PdfVerticalAlignment.middle);
+      }
+      header.cells[i].style= headerStyle;
+
+    }
+PdfGridRow row = grid.rows.add();
+    row.cells[0].value = 'CA-1098';
+    row.cells[1].value = itemController.text;
+    row.cells[2].value = '\$7';
+    row.cells[3].value = companyController.text;
+    row.cells[4].value = double.parse(companyController.text);
+    row = grid.rows.add();
+    row.cells[0].value = 'LJ-0192';
+    row.cells[1].value = itemController.text;
+    row.cells[2].value = '\$49.99';
+    row.cells[3].value = '3';
+    row.cells[4].value = '\$149.97';
+    row = grid.rows.add();
+    row.cells[0].value = 'So-B909-M';
+    row.cells[1].value = 'Mountain Bike Socks,M';
+    row.cells[2].value = '\$9.5';
+    row.cells[3].value = '2';
+    row.cells[4].value = '\$19';
+    row = grid.rows.add();
+    row.cells[0].value = 'LJ-0192';
+    row.cells[1].value = 'Long-Sleeve Logo Jersey,M';
+    row.cells[2].value = '\$49.99';
+    row.cells[3].value = '4';
+    row.cells[4].value = '\$199.96';
+
+    // cell padding
+    grid.style.cellPadding = PdfPaddings(left: 2, right: 2, top: 2, bottom: 2);
+    //grid style
+    PdfGridCellStyle cellStyle = PdfGridCellStyle();
+    cellStyle.borders.all = PdfPens.white;
+    cellStyle.borders.bottom = PdfPen(PdfColor(217, 217, 217), width: 0.70);
+    cellStyle.font = PdfStandardFont(PdfFontFamily.timesRoman, 12);
+    cellStyle.textBrush = PdfSolidBrush(PdfColor(131, 130, 136));
+    //
+    for (int i = 0; i < grid.rows.count; i++) {
+      PdfGridRow row = grid.rows[i];
+      for (int j = 0; j < row.cells.count; j++) {
+        row.cells[j].style = cellStyle;
+        if (j == 0 || j == 1) {
+          row.cells[j].stringFormat = PdfStringFormat(
+              alignment: PdfTextAlignment.left,
+              lineAlignment: PdfVerticalAlignment.middle);
+        } else {
+          row.cells[j].stringFormat = PdfStringFormat(
+              alignment: PdfTextAlignment.right,
+              lineAlignment: PdfVerticalAlignment.middle);
+        }
+      }
+    }
+    PdfLayoutFormat layoutFormat =
+    PdfLayoutFormat(layoutType: PdfLayoutType.paginate);
+    // draw a grid
+
+    //grand total
+    PdfLayoutResult gridoutput = grid.draw(
+        page: page,
+        bounds: Rect.fromLTWH(0, result.bounds.bottom + 20,
+            page.graphics.clientSize.width, page.graphics.clientSize.height - 100),
+        format: layoutFormat)!;
+
+    gridoutput.page.graphics.drawString(
+        'Grand Total :                             \$386.91', PdfStandardFont(PdfFontFamily.timesRoman, 14),
+        brush: PdfSolidBrush(PdfColor(126, 155, 203)),
+        bounds: Rect.fromLTWH(520, gridoutput.bounds.bottom + 30, 0, 0));
+
+    gridoutput.page.graphics.drawString(
+        'Thank you for your business !', PdfStandardFont(PdfFontFamily.timesRoman, 14),
+        brush: PdfBrushes.black,
+        bounds: Rect.fromLTWH(520, gridoutput.bounds.bottom + 60, 0, 0));
+
+
+//
+
+
+
 
     List<int> bytes= document.save();
-
+    //
     document.dispose();
     saveandLaunchFile(bytes,"Invoice.pdf");
 
