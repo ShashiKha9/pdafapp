@@ -12,8 +12,13 @@ void main() {
     debugShowCheckedModeBanner: false,
      home: DetailsScreenPage()));
 }
+class DetailsScreenPage extends StatefulWidget{
+  DetailsScreenPageState createState()=> DetailsScreenPageState();
 
-class DetailsScreenPage extends StatelessWidget{
+}
+
+class DetailsScreenPageState extends State <DetailsScreenPage>{
+  final GlobalKey<FormState > _formKey=GlobalKey<FormState>();
 
   final nameController = TextEditingController();
   final emailController = TextEditingController();
@@ -30,7 +35,7 @@ class DetailsScreenPage extends StatelessWidget{
     final page = document.pages.add();
     PdfTextElement elements = PdfTextElement();
     elements= PdfTextElement(text: companyController.text,font: PdfStandardFont(PdfFontFamily.helvetica,32));
-    elements.brush= PdfBrushes.violet;
+    elements.brush= PdfBrushes.steelBlue;
     elements.draw(
         page: page,bounds: Rect.fromLTWH(10, 15, 0, 0)
     );
@@ -228,12 +233,16 @@ PdfGridRow row = grid.rows.add();
 return SafeArea(
     child: Scaffold(
       resizeToAvoidBottomInset: false,
-      body: Column(
+      body: Form(
+        key: _formKey,
+      child:
+      Column(
         children: [
           ClipPath(
             child: Image(image: NetworkImage("https://images.saymedia-content.com/.image/t_share/MTc1MDA5Njc1OTYzNTQxMjI0/shades-red-greensleeves.jpg")),
             clipper: MyClipper(),
           ),
+
           Padding(padding: EdgeInsets.fromLTRB(10, 20, 10, 10),
          child: TextField(
             controller: nameController,
@@ -252,7 +261,12 @@ return SafeArea(
             children: [
               Expanded(child:
               Padding(padding: EdgeInsets.fromLTRB(10, 20, 10, 10),
-                  child: TextField(
+                  child: TextFormField(
+                    validator: (value){
+                      if(value!.isEmpty){
+                        return "please enter email";
+                      }
+                    },
                     controller: emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
@@ -268,7 +282,12 @@ return SafeArea(
               ),
               Expanded(child:
               Padding(padding: EdgeInsets.fromLTRB(10, 20, 10, 10),
-                  child: TextField(
+                  child: TextFormField(
+                    validator: (value){
+                      if(value!.isEmpty){
+                        return "please enter phone number";
+                      }
+                    },
                     controller: phoneNoController,
                     keyboardType: TextInputType.phone,
                     decoration: InputDecoration(
@@ -288,7 +307,14 @@ return SafeArea(
             ],
           ),
           Padding(padding: EdgeInsets.fromLTRB(10, 20, 10, 10),
-              child: TextField(
+              child: TextFormField(
+                validator: (value){
+                  if(value!.isEmpty){
+                    return "please enter company name";
+
+                  }
+                },
+
                 controller: companyController,
                 keyboardType: TextInputType.name,
                 decoration: InputDecoration(
@@ -306,7 +332,12 @@ return SafeArea(
             children: [
               Expanded(child:
               Padding(padding: EdgeInsets.fromLTRB(10, 20, 10, 10),
-                  child: TextField(
+                  child: TextFormField(
+                    validator: (value){
+                      if(value!.isEmpty){
+                        return "please enter product";
+                      }
+                    },
                     controller: itemController,
                     keyboardType: TextInputType.name,
                     decoration: InputDecoration(
@@ -322,7 +353,12 @@ return SafeArea(
               ),
               Expanded(child:
               Padding(padding: EdgeInsets.fromLTRB(10, 20, 10, 10),
-                  child: TextField(
+                  child: TextFormField(
+                    validator: (value){
+                      if(value!.isEmpty){
+                        return "please enter quantity";
+                      }
+                    },
                     controller: qunatityController,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
@@ -344,9 +380,21 @@ return SafeArea(
           SizedBox(
             height: 35,
           ),
-          RaisedButton(onPressed: generateInvoice,
+          RaisedButton(onPressed: (){
+            setState(() {
+              if(_formKey.currentState!.validate()){
+                generateInvoice();
+                return;
 
-            
+              }
+            });
+
+
+    },
+
+
+
+
 
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(13)
@@ -356,7 +404,7 @@ return SafeArea(
             style: TextStyle(color: Colors.white,fontWeight: FontWeight.w400),),)
         ],
       ),
-
+      ),
     ));
   }
 }
