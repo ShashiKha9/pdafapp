@@ -20,34 +20,53 @@ class DetailsScreenPage extends StatelessWidget{
   final phoneNoController = TextEditingController();
   final companyController = TextEditingController();
   final itemController = TextEditingController();
+  final qunatityController = TextEditingController();
+  final addController = TextEditingController();
+
+
 
   Future<void> generateInvoice() async{
     final PdfDocument document = PdfDocument();
     final page = document.pages.add();
-    PdfTextElement element= PdfTextElement(
-      text: "INVOICE 001",font: PdfStandardFont(PdfFontFamily.timesRoman, 14)
+    PdfTextElement elements = PdfTextElement();
+    elements= PdfTextElement(text: companyController.text,font: PdfStandardFont(PdfFontFamily.helvetica,32));
+    elements.brush= PdfBrushes.violet;
+    elements.draw(
+        page: page,bounds: Rect.fromLTWH(10, 15, 0, 0)
     );
+
+    PdfTextElement element= PdfTextElement(
+      text: "INVOICE 001",font: PdfStandardFont(PdfFontFamily.helvetica, 22)
+    );
+
+
+
 
     PdfLayoutResult result = element.draw(
       page: page,
-      bounds: Rect.fromLTWH(10, 100, 0, 0)
+      bounds: Rect.fromLTWH(10, 60, 0, 0)
     )!;
     String currentDate = "Date"+ DateFormat.yMMMMd().format(DateTime.now());
-    
+
     page.graphics.drawString(currentDate, PdfStandardFont(PdfFontFamily.timesRoman, 14,),
         brush: element.brush,
-        bounds: Offset(page.graphics.clientSize.width - 120,
-            result.bounds.top) &
-        Size(80 + 2, 20));
+        // bounds: Offset(page.graphics.clientSize.width - 50,
+        //     result.bounds.top) &
+        // Size(80 + 5, 20)
+      bounds: Rect.fromLTWH(370, result.bounds.top, 0, 0)
+    );
+
     //
     element = PdfTextElement(
         text: 'BILL TO ',
-        font: PdfStandardFont(PdfFontFamily.timesRoman, 10,
+        font: PdfStandardFont(PdfFontFamily.timesRoman, 14,
             style: PdfFontStyle.bold));
     element.brush = PdfSolidBrush(PdfColor(126, 155, 203));
 
     result = element.draw(
-        page: page, bounds: Rect.fromLTWH(10, result.bounds.bottom + 25, 0, 0))!;
+        page: page, bounds: Rect.fromLTWH(10, result.bounds.bottom + 20, 0, 0))!;
+
+
 
     element = PdfTextElement(text:  nameController.text, font: PdfStandardFont(PdfFontFamily.timesRoman,14));
     element.brush = PdfBrushes.black;
@@ -64,11 +83,7 @@ class DetailsScreenPage extends StatelessWidget{
     result = element.draw(
         page: page, bounds: Rect.fromLTWH(10, result.bounds.bottom + 10, 0, 0))!;
     // address to
-    element= PdfTextElement(text: "fghhdfghdgh",font: PdfStandardFont(PdfFontFamily.timesRoman,12));
-    element.brush=PdfBrushes.black;
-    element.draw(
-      page: page,bounds: Rect.fromLTWH(10, result.bounds.top+10, 0, 0)
-    );
+
 
     page.graphics.drawLine(
         PdfPen(PdfColor(126, 151, 173), width: 0.7),
@@ -116,24 +131,24 @@ class DetailsScreenPage extends StatelessWidget{
 PdfGridRow row = grid.rows.add();
     row.cells[0].value = 'CA-1098';
     row.cells[1].value = itemController.text;
-    row.cells[2].value = '\$7';
-    row.cells[3].value = companyController.text;
-    row.cells[4].value = double.parse(companyController.text);
+    row.cells[2].value = '\$9.99';
+    row.cells[3].value = qunatityController.text;
+    row.cells[4].value = "\$${int.parse(qunatityController.text) * 9.99}" ;
     row = grid.rows.add();
     row.cells[0].value = 'LJ-0192';
-    row.cells[1].value = itemController.text;
+    row.cells[1].value = "Jeans";
     row.cells[2].value = '\$49.99';
     row.cells[3].value = '3';
     row.cells[4].value = '\$149.97';
     row = grid.rows.add();
     row.cells[0].value = 'So-B909-M';
-    row.cells[1].value = 'Mountain Bike Socks,M';
+    row.cells[1].value = 'Shoes';
     row.cells[2].value = '\$9.5';
     row.cells[3].value = '2';
     row.cells[4].value = '\$19';
     row = grid.rows.add();
     row.cells[0].value = 'LJ-0192';
-    row.cells[1].value = 'Long-Sleeve Logo Jersey,M';
+    row.cells[1].value = 'Bag';
     row.cells[2].value = '\$49.99';
     row.cells[3].value = '4';
     row.cells[4].value = '\$199.96';
@@ -174,14 +189,15 @@ PdfGridRow row = grid.rows.add();
         format: layoutFormat)!;
 
     gridoutput.page.graphics.drawString(
-        'Grand Total :                             \$386.91', PdfStandardFont(PdfFontFamily.timesRoman, 14),
+        'Grand Total :                   \$386.91', PdfStandardFont(PdfFontFamily.timesRoman, 14),
         brush: PdfSolidBrush(PdfColor(126, 155, 203)),
-        bounds: Rect.fromLTWH(520, gridoutput.bounds.bottom + 30, 0, 0));
+        bounds: Rect.fromLTWH(310, gridoutput.bounds.bottom + 30, 0, 0));
 
     gridoutput.page.graphics.drawString(
-        'Thank you for your business !', PdfStandardFont(PdfFontFamily.timesRoman, 14),
+        'Thank you for your Order!', PdfStandardFont(PdfFontFamily.timesRoman, 17),
         brush: PdfBrushes.black,
-        bounds: Rect.fromLTWH(520, gridoutput.bounds.bottom + 60, 0, 0));
+        bounds: Rect.fromLTWH(320, gridoutput.bounds.bottom + 80, 0, 0));
+
 
 
 //
@@ -232,40 +248,51 @@ return SafeArea(
             ),
          )
           ),
-          Padding(padding: EdgeInsets.fromLTRB(10, 20, 10, 10),
-              child: TextField(
-                controller: emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                    hintText: "Email",
-                    isDense: true,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
+          Row(
+            children: [
+              Expanded(child:
+              Padding(padding: EdgeInsets.fromLTRB(10, 20, 10, 10),
+                  child: TextField(
+                    controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(
+                        hintText: "Email",
+                        isDense: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
 
-                    )
-                ),
-              )
-          ),
-          Padding(padding: EdgeInsets.fromLTRB(10, 20, 10, 10),
-              child: TextField(
-                controller: phoneNoController,
-                keyboardType: TextInputType.phone,
-                decoration: InputDecoration(
-                    hintText: "Phone No",
-                    isDense: true,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
+                        )
+                    ),
+                  )
+              ),
+              ),
+              Expanded(child:
+              Padding(padding: EdgeInsets.fromLTRB(10, 20, 10, 10),
+                  child: TextField(
+                    controller: phoneNoController,
+                    keyboardType: TextInputType.phone,
+                    decoration: InputDecoration(
+                        hintText: "Phone No",
+                        isDense: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
 
-                    )
-                ),
-              )
+                        )
+                    ),
+                  )
+              ),
+              ),
+
+
+
+            ],
           ),
           Padding(padding: EdgeInsets.fromLTRB(10, 20, 10, 10),
               child: TextField(
                 controller: companyController,
                 keyboardType: TextInputType.name,
                 decoration: InputDecoration(
-                    hintText: "Company Name",
+                    hintText: "Company",
                     isDense: true,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
@@ -274,32 +301,58 @@ return SafeArea(
                 ),
               )
           ),
-          Padding(padding: EdgeInsets.fromLTRB(10, 20, 10, 10),
-              child: TextField(
-                controller: itemController,
-                keyboardType: TextInputType.name,
-                decoration: InputDecoration(
-                    hintText: "Item Details",
-                    isDense: true,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
 
-                    )
-                ),
-              )
+          Row(
+            children: [
+              Expanded(child:
+              Padding(padding: EdgeInsets.fromLTRB(10, 20, 10, 10),
+                  child: TextField(
+                    controller: itemController,
+                    keyboardType: TextInputType.name,
+                    decoration: InputDecoration(
+                        hintText: "Product",
+                        isDense: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+
+                        )
+                    ),
+                  )
+              ),
+              ),
+              Expanded(child:
+              Padding(padding: EdgeInsets.fromLTRB(10, 20, 10, 10),
+                  child: TextField(
+                    controller: qunatityController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                        hintText: "Quantity",
+                        isDense: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+
+                        )
+                    ),
+                  )
+              ),
+              ),
+
+            ],
           ),
+
+
           SizedBox(
-            height: 20,
+            height: 35,
           ),
           RaisedButton(onPressed: generateInvoice,
 
             
 
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20)
+              borderRadius: BorderRadius.circular(13)
             ),
             color: Colors.red,
-          child: Text("Generate",
+          child: Text("Generate PDF",
             style: TextStyle(color: Colors.white,fontWeight: FontWeight.w400),),)
         ],
       ),
